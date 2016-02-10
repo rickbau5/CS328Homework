@@ -15,7 +15,7 @@ object WorldUtils {
     bodyDef.position.set(new Vector2(Vals.groundX, Vals.groundY))
     val body = forWorld.createBody(bodyDef)
     val shape = new PolygonShape()
-    shape.setAsBox(Vals.groundWidth / 2, Vals.groundHeight)
+    shape.setAsBox(Vals.groundWidth / 2, Vals.groundHeight / 2)
     body.createFixture(shape, Vals.groundDensity)
     shape.dispose()
     body

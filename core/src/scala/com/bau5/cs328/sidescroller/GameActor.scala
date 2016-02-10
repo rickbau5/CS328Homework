@@ -16,11 +16,24 @@ class Ground(body: Body) extends GameActor(body, new GroundUserData)
 
 class Runner(body: Body) extends GameActor(body, new RunnerUserData(Vals.runnerJumpImpulse)) {
   var jumping = false
-  def jump(): Unit = jumping match {
+  var dodging = false
+  def jump(): Unit = jumping && dodging match {
     case false =>
       body.applyLinearImpulse(userData.jumpImpulse, body.getWorldCenter, true)
       jumping = true
     case true => ;
+  }
+
+  def dodge(): Unit = jumping match {
+    case false =>
+      body.setTransform(userData.dodgingPosition, userData.dodgeAngle)
+      dodging = true
+    case true => ;
+  }
+
+  def stopDodge(): Unit = {
+    body.setTransform(userData.runningPosition, 0f)
+    dodging = false
   }
 
   def landed(): Unit = jumping = false
@@ -28,4 +41,8 @@ class Runner(body: Body) extends GameActor(body, new RunnerUserData(Vals.runnerJ
 
 abstract class UserData
 case class GroundUserData() extends UserData
-case class RunnerUserData(jumpImpulse: Vector2) extends UserData
+case class RunnerUserData(jumpImpulse: Vector2) extends UserData {
+  val runningPosition = new Vector2(Vals.runnerX, Vals.runnerY)
+  val dodgingPosition = new Vector2(Vals.runnerDodgeX, Vals.runnerDodgeY)
+  val dodgeAngle = (-90 * (Math.PI / 180f)).toFloat
+}

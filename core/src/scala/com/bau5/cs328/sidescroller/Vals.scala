@@ -26,5 +26,7 @@ object Vals {
   val runnerWidth = 1f
   val runnerHeight = 2f
   val runnerDensity = 0.5f
+  val runnerDodgeX = 2f
+  val runnerDodgeY = 1.5f
   val runnerJumpImpulse = new Vector2(0.0f, 7.0f)
 }

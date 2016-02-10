@@ -18,6 +18,7 @@ public class GameStage extends Stage implements ContactListener {
 
     private Vector3 touchPoint;
     private Rectangle screenRight;
+    private Rectangle screenLeft;
 
     private final float step = 1 / 300f;
     private float accumulator = 0f;
@@ -50,6 +51,7 @@ public class GameStage extends Stage implements ContactListener {
     private void setupControlAreas() {
         touchPoint = new Vector3();
         screenRight = new Rectangle(getCamera().viewportWidth / 2, 0, getCamera().viewportWidth / 2, getCamera().viewportHeight);
+        screenLeft = new Rectangle(0, 0,  getCamera().viewportWidth / 2, getCamera().viewportHeight);
         Gdx.input.setInputProcessor(this);
     }
 
@@ -58,9 +60,19 @@ public class GameStage extends Stage implements ContactListener {
         getCamera().unproject(touchPoint.set(screenX, screenY, 0));
         if (screenRight.contains(touchPoint.x, touchPoint.y)) {
             runner.jump();
+        } else if (!runner.dodging() && screenLeft.contains(touchPoint.x, touchPoint.y)) {
+            runner.dodge();
         }
 
         return super.touchDown(screenX, screenY, pointer, button);
+    }
+
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if (runner.dodging()) {
+            runner.stopDodge();
+        }
+        return super.touchUp(screenX, screenY, pointer, button);
     }
 
     @Override
