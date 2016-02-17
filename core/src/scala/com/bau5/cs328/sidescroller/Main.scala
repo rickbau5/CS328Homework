@@ -7,6 +7,10 @@ import com.badlogic.gdx.Game
   */
 class Main extends Game {
   override def create(): Unit = {
-    setScreen(new GameScreen)
+    transitionToScreen(new GameScreen)
+  }
+  def transitionToScreen(screen: GameScreen): Unit = {
+    Option(getScreen).foreach(_.dispose())
+    setScreen(screen)
   }
 }

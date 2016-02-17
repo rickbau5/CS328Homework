@@ -1,11 +1,13 @@
 package com.bau5.cs328.sidescroller;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
 
 
 /**
@@ -31,6 +33,42 @@ public class GameStage extends Stage implements ContactListener {
         setupWorld();
         setupCamera();
         setupControlAreas();
+        createEnemy();
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+
+        Array<Body> bodies = new Array<>(world.getBodyCount());
+        world.getBodies(bodies);
+        for (Body body : bodies) {
+            updateBody(body);
+        }
+
+        accumulator += delta;
+        while (accumulator >= delta) {
+            world.step(step, 6, 2);
+            accumulator -= step;
+        }
+    }
+
+    private void updateBody(Body body) {
+        if (!(body.getUserData() instanceof GroundUserData) && !BodyHelper.bodyOnScreen(body)) {
+            // TODO: GameScreen transition
+            if (BodyHelper.isRunner(body) && runner.hit()) {
+                Gdx.app.exit();
+            }
+            if (BodyHelper.isEnemy(body) && !runner.hit()) {
+                createEnemy();
+            }
+            world.destroyBody(body);
+        }
+    }
+
+    private void createEnemy() {
+        Enemy enemy = new Enemy(WorldUtils.createEnemy(world));
+        addActor(enemy);
     }
 
     private void setupWorld() {
@@ -39,13 +77,15 @@ public class GameStage extends Stage implements ContactListener {
         runner = new Runner(WorldUtils.createRunner(world));
         addActor(ground);
         addActor(runner);
+        addActor(new Background());
+        addActor(new Grass());
         world.setContactListener(this);
     }
 
     private void setupCamera() {
         camera = new OrthographicCamera(Vals.viewportWidth(), Vals.viewportHeight());
         camera.position.set(camera.viewportWidth / 2, camera. viewportHeight / 2, 0f);
-        camera .update();
+        camera.update();
     }
 
     private void setupControlAreas() {
@@ -76,13 +116,24 @@ public class GameStage extends Stage implements ContactListener {
     }
 
     @Override
-    public void act(float delta) {
-        super.act(delta);
-        accumulator += delta;
-        while (accumulator >= delta) {
-            world.step(step, 6, 2);
-            accumulator -= step;
+    public boolean keyDown(int keyCode) {
+        if (keyCode == Input.Keys.SPACE) {
+            runner.jump();
+            return true;
+        } else if (keyCode == Input.Keys.D && !runner.isDodging()){
+            runner.dodge();
+            return true;
         }
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keyCode) {
+        if (keyCode  == Input.Keys.D && runner.isDodging()) {
+            runner.stopDodge();
+            return true;
+        }
+        return super.keyUp(keyCode);
     }
 
     @Override
@@ -93,7 +144,9 @@ public class GameStage extends Stage implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
-        if (runner.jumping() && ContactHandler.checkRunnerAndGroundContact(contact)) {
+        if (BodyHelper.computeContactType(contact) instanceof RunnerEnemyContact) {
+            runner.onHit(BodyHelper.getNonRunner(contact));
+        } else if (runner.jumping() && BodyHelper.computeContactType(contact) instanceof RunnerGroundContact) {
             runner.landed();
         }
     }
@@ -102,7 +155,12 @@ public class GameStage extends Stage implements ContactListener {
     public void endContact(Contact contact) {}
 
     @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {}
+    public void preSolve(Contact contact, Manifold oldManifold) {
+        // After runner has been hit, let him fall through all objects
+        if (runner.hit() && !BodyHelper.continueContact(contact, runner)) {
+            contact.setEnabled(false);
+        }
+    }
 
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {}
