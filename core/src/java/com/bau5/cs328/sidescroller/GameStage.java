@@ -4,12 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
+import scala.Option;
 
 
 /**
@@ -19,6 +21,8 @@ public class GameStage extends Stage implements ContactListener {
     private World world;
     private Ground ground;
     private Runner runner;
+
+    private Boolean debug = Vals.debug();
 
     // ;)
     private TouchType touchType = TouchType.None;
@@ -36,9 +40,8 @@ public class GameStage extends Stage implements ContactListener {
     public GameStage() {
         super(new ScalingViewport(Scaling.stretch, Vals.screenWidth(), Vals.screenHeight(),
                     new OrthographicCamera(Vals.screenWidth(), Vals.screenHeight())));
-        renderer = new Box2DDebugRenderer();
         setupWorld();
-        setupCamera();
+        setupDebugRenderer();
         setupControlAreas();
         createEnemy();
     }
@@ -81,8 +84,7 @@ public class GameStage extends Stage implements ContactListener {
     }
 
     private void createEnemy() {
-        Enemy enemy = new Enemy(WorldUtils.createEnemy(world));
-        addActor(enemy);
+        addActor(new Enemy(WorldUtils.createEnemy(world)));
     }
 
     private void setupWorld() {
@@ -96,8 +98,9 @@ public class GameStage extends Stage implements ContactListener {
         world.setContactListener(this);
     }
 
-    private void setupCamera() {
-        camera = new OrthographicCamera(Vals.viewportWidth(), Vals.viewportHeight());
+    private void setupDebugRenderer() {
+        renderer = new Box2DDebugRenderer();
+        camera = new OrthographicCamera(Vals.debugWidth(), Vals.debugHeight());
         camera.position.set(camera.viewportWidth / 2, camera. viewportHeight / 2, 0f);
         camera.update();
     }
@@ -119,7 +122,6 @@ public class GameStage extends Stage implements ContactListener {
             runner.dodge();
             touchType = TouchType.Dodge;
         }
-        System.out.println("Touch Down");
 
         return super.touchDown(screenX, screenY, pointer, button);
     }
@@ -163,7 +165,9 @@ public class GameStage extends Stage implements ContactListener {
     @Override
     public void draw() {
         super.draw();
-        renderer.render(world, camera.combined);
+        if (debug) {
+            renderer.render(world, camera.combined);
+        }
     }
 
     @Override

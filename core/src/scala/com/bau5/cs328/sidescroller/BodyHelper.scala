@@ -23,6 +23,7 @@ object BodyHelper {
       case (b: GroundUserData, a: RunnerUserData) => new RunnerGroundContact(bodyB, bodyA)
       case (a: RunnerUserData, b: EnemyUserData)  => new RunnerEnemyContact(bodyA, bodyB)
       case (b: EnemyUserData, a: RunnerUserData)  => new RunnerEnemyContact(bodyB, bodyA)
+      case _ => NoContact
     }
   }
 
@@ -78,3 +79,4 @@ object BodyHelper {
 sealed abstract class ContactType(val runner: Body, val other: Body)
 class RunnerGroundContact(runner: Body, val ground: Body) extends ContactType(runner, ground)
 class RunnerEnemyContact(runner: Body, val enemy: Body) extends ContactType(runner, enemy)
+object NoContact extends ContactType(null, null)

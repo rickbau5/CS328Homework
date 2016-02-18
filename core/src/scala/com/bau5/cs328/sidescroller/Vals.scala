@@ -9,27 +9,28 @@ import com.badlogic.gdx.math.Vector2
 object Vals {
   val screenWidth = 800
   val screenHeight = 480
-  val viewportWidth = 20
-  val viewportHeight = 13
   val ratio = 32
+
+  val debugWidth = 20
+  val debugHeight = 13
+  val debug = true
 
   val gravity = new Vector2(0, -10f)
 
   val groundX = 0
   val groundY = 0
-  val groundWidth = 50f
-  val groundHeight = 4f
-  val groundTop = groundY + groundHeight / 2
+  val groundWidth = 25f * 2
+  val groundHeight = 2f
+  val groundTop = groundY + groundHeight
   val groundDensity = 0f
 
-  val runnerWidth = 1f
-  val runnerHeight = 2f
   val runnerX = 2
   val runnerY = groundTop
-  val runnerPosition = new Vector2(runnerX, runnerY + runnerHeight / 2)
+  val runnerWidth = 1f
+  val runnerHeight = 2f
   val runnerDensity = 0.5f
   val runnerDodgeX = 2f
-  val runnerDodgeY = groundTop + 0.5f
+  val runnerDodgeY = groundTop
   val runnerJumpImpulse = new Vector2(0.0f, 7.0f)
   val runnerHitImpulse = 7f
 

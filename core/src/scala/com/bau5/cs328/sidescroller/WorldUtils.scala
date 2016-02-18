@@ -40,12 +40,13 @@ object WorldUtils {
     val bodyDef = new BodyDef()
     // That moment when Java people use Scala reserved keywords...
     bodyDef.`type` = BodyDef.BodyType.DynamicBody
-    bodyDef.position.set(Vals.runnerPosition)
-    val body = forWorld.createBody(bodyDef)
+    bodyDef.position.set(new Vector2(Vals.runnerX, Vals.runnerY))
     val shape = new PolygonShape()
     shape.setAsBox(Vals.runnerWidth / 2, Vals.runnerHeight / 2)
+    val body = forWorld.createBody(bodyDef)
     body.createFixture(shape, Vals.runnerDensity)
     body.resetMassData()
+    body.setUserData(new RunnerUserData(Vals.runnerWidth, Vals.runnerHeight))
     shape.dispose()
     body
   }
