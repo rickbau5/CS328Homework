@@ -92,9 +92,9 @@ public class GameStage extends Stage implements ContactListener {
         ground = new Ground(WorldUtils.createGround(world));
         runner = new Runner(WorldUtils.createRunner(world));
         addActor(ground);
-        addActor(runner);
         addActor(new Background());
         addActor(new Grass());
+        addActor(runner);
         world.setContactListener(this);
     }
 
