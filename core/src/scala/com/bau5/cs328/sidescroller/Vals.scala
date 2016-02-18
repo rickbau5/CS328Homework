@@ -11,6 +11,7 @@ object Vals {
   val screenHeight = 480
   val viewportWidth = 20
   val viewportHeight = 13
+  val ratio = 32
 
   val gravity = new Vector2(0, -10f)
 

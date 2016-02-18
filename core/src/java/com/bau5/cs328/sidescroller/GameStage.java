@@ -8,6 +8,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.utils.viewport.ScalingViewport;
 
 
 /**
@@ -17,6 +19,9 @@ public class GameStage extends Stage implements ContactListener {
     private World world;
     private Ground ground;
     private Runner runner;
+
+    // ;)
+    private TouchType touchType = TouchType.None;
 
     private Vector3 touchPoint;
     private Rectangle screenRight;
@@ -29,6 +34,8 @@ public class GameStage extends Stage implements ContactListener {
     private Box2DDebugRenderer renderer;
 
     public GameStage() {
+        super(new ScalingViewport(Scaling.stretch, Vals.screenWidth(), Vals.screenHeight(),
+                    new OrthographicCamera(Vals.screenWidth(), Vals.screenHeight())));
         renderer = new Box2DDebugRenderer();
         setupWorld();
         setupCamera();
@@ -50,6 +57,13 @@ public class GameStage extends Stage implements ContactListener {
         while (accumulator >= delta) {
             world.step(step, 6, 2);
             accumulator -= step;
+        }
+
+        if (touchType != TouchType.None && !runner.isDodging() && !runner.isJumping()) {
+            switch (touchType) {
+                case Jump: runner.jump();
+                case Dodge: runner.dodge();
+            }
         }
     }
 
@@ -100,18 +114,22 @@ public class GameStage extends Stage implements ContactListener {
         getCamera().unproject(touchPoint.set(screenX, screenY, 0));
         if (screenRight.contains(touchPoint.x, touchPoint.y)) {
             runner.jump();
-        } else if (!runner.dodging() && screenLeft.contains(touchPoint.x, touchPoint.y)) {
+            touchType = TouchType.Jump;
+        } else if (!runner.isDodging() && screenLeft.contains(touchPoint.x, touchPoint.y)) {
             runner.dodge();
+            touchType = TouchType.Dodge;
         }
+        System.out.println("Touch Down");
 
         return super.touchDown(screenX, screenY, pointer, button);
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (runner.dodging()) {
+        if (runner.isDodging()) {
             runner.stopDodge();
         }
+        touchType = TouchType.None;
         return super.touchUp(screenX, screenY, pointer, button);
     }
 
@@ -119,8 +137,10 @@ public class GameStage extends Stage implements ContactListener {
     public boolean keyDown(int keyCode) {
         if (keyCode == Input.Keys.SPACE) {
             runner.jump();
+            touchType = TouchType.Jump;
             return true;
         } else if (keyCode == Input.Keys.D && !runner.isDodging()){
+            touchType = TouchType.Dodge;
             runner.dodge();
             return true;
         }
@@ -129,8 +149,12 @@ public class GameStage extends Stage implements ContactListener {
 
     @Override
     public boolean keyUp(int keyCode) {
-        if (keyCode  == Input.Keys.D && runner.isDodging()) {
+        if (keyCode == Input.Keys.D && runner.isDodging()) {
             runner.stopDodge();
+            touchType = TouchType.None;
+            return true;
+        } else if (keyCode == Input.Keys.SPACE && runner.isJumping()) {
+            touchType = TouchType.None;
             return true;
         }
         return super.keyUp(keyCode);
@@ -144,9 +168,10 @@ public class GameStage extends Stage implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
-        if (BodyHelper.computeContactType(contact) instanceof RunnerEnemyContact) {
-            runner.onHit(BodyHelper.getNonRunner(contact));
-        } else if (runner.jumping() && BodyHelper.computeContactType(contact) instanceof RunnerGroundContact) {
+        ContactType contactType = BodyHelper.computeContactType(contact);
+        if (contactType instanceof RunnerEnemyContact) {
+            runner.onHit(contactType.runner());
+        } else if (runner.isJumping() && BodyHelper.computeContactType(contact) instanceof RunnerGroundContact) {
             runner.landed();
         }
     }
@@ -164,4 +189,8 @@ public class GameStage extends Stage implements ContactListener {
 
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {}
+}
+
+enum TouchType {
+    Jump, Dodge, None
 }

@@ -17,11 +17,12 @@ object BodyHelper {
     * @return ContactType that is the type of contact
     */
   def computeContactType(contact: Contact): ContactType = {
-    (contact.getFixtureA.getBody.getUserData, contact.getFixtureB.getBody.getUserData) match {
-      case (a: RunnerUserData, b: GroundUserData) => new RunnerGroundContact
-      case (b: GroundUserData, a: RunnerUserData) => new RunnerGroundContact
-      case (a: RunnerUserData, b: EnemyUserData)  => new RunnerEnemyContact
-      case (b: EnemyUserData, a: RunnerUserData)  => new RunnerEnemyContact
+    val (bodyA, bodyB) = (contact.getFixtureA.getBody, contact.getFixtureB.getBody)
+    (bodyA.getUserData, bodyB.getUserData) match {
+      case (a: RunnerUserData, b: GroundUserData) => new RunnerGroundContact(bodyA, bodyB)
+      case (b: GroundUserData, a: RunnerUserData) => new RunnerGroundContact(bodyB, bodyA)
+      case (a: RunnerUserData, b: EnemyUserData)  => new RunnerEnemyContact(bodyA, bodyB)
+      case (b: EnemyUserData, a: RunnerUserData)  => new RunnerEnemyContact(bodyB, bodyA)
     }
   }
 
@@ -48,7 +49,7 @@ object BodyHelper {
     * @return True if on screen, false if not
     */
   def bodyOnScreen(body: Body): Boolean = body.getUserData match {
-    case data : SizedUserData => body.getPosition.x + data.width / 2 > 0 && body.getPosition.y + data.height / 2 > 0
+    case data : UserData => body.getPosition.x + data.width / 2 > 0 && body.getPosition.y + data.height / 2 > 0
     case _ => false
   }
 
@@ -74,6 +75,6 @@ object BodyHelper {
   }
 }
 
-sealed abstract class ContactType
-class RunnerGroundContact extends ContactType
-class RunnerEnemyContact extends ContactType
+sealed abstract class ContactType(val runner: Body, val other: Body)
+class RunnerGroundContact(runner: Body, val ground: Body) extends ContactType(runner, ground)
+class RunnerEnemyContact(runner: Body, val enemy: Body) extends ContactType(runner, enemy)
