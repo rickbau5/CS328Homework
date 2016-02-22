@@ -1,7 +1,8 @@
-package com.bau5.cs328.sidescroller
+package com.bau5.cs328.sidescroller.screens
 
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.{Gdx, Screen}
+import com.bau5.cs328.sidescroller.GameStage
 
 /**
   * Created by Rick on 2/9/16.

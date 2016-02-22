@@ -2,6 +2,7 @@ package com.bau5.cs328.sidescroller
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.{PolygonShape, BodyDef, Body, World}
+import com.bau5.cs328.sidescroller.actors.{EnemyUserData, RunnerUserData, SimpleUserData}
 
 import scala.util.Random
 
@@ -47,6 +48,7 @@ object WorldUtils {
     body.createFixture(shape, Vals.runnerDensity)
     body.resetMassData()
     body.setUserData(new RunnerUserData(Vals.runnerWidth, Vals.runnerHeight))
+    body.setAngularDamping(0.0f)
     shape.dispose()
     body
   }
@@ -71,6 +73,18 @@ object WorldUtils {
     shape.dispose()
     body
   }
+
+  def createSimpleBody(world: World, x: Float, y: Float, width: Float, height: Float): Body = {
+    val bodyDef = new BodyDef
+    bodyDef.position.set(new Vector2(x, y + Vals.groundTop - 1.5f))
+    val shape = new PolygonShape()
+    shape.setAsBox(width / 2, height / 2)
+    val body = world.createBody(bodyDef)
+    body.createFixture(shape, Vals.runnerDensity)
+    body.resetMassData()
+    shape.dispose()
+    body
+  }
 }
 
 /**
@@ -81,7 +95,7 @@ object EnemyType {
   val all = List(SmallEnemy, WideEnemy, LongEnemy, BigEnemy, SmallFlyingEnemy, WideFlyingEnemy)
 
 //  def random(): EnemyType = all(rand.nextInt(EnemyType.all.length))
-  def random(): EnemyType = SmallFlyingEnemy
+  def random(): EnemyType = BigEnemy
 }
 sealed abstract class EnemyType(val width: Float, val height: Float, val x: Float, val y: Float, val density: Float)
 

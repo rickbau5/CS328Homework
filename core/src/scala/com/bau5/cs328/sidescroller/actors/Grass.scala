@@ -1,8 +1,9 @@
-package com.bau5.cs328.sidescroller
+package com.bau5.cs328.sidescroller.actors
 
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.{Batch, TextureRegion}
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.bau5.cs328.sidescroller.Vals
 
 /**
   * Created by Rick on 2/17/16.
@@ -17,6 +18,7 @@ class Grass extends Actor {
 
   override def draw(batch: Batch, parentAlpha: Float): Unit = {
     super.draw(batch, parentAlpha)
+    // scrolliung texture
     xOff += 1
     if (xOff >= Vals.screenWidth) {
       xOff = 0

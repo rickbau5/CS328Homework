@@ -7,11 +7,12 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
-import scala.Option;
+import com.bau5.cs328.sidescroller.actors.*;
 
 
 /**
@@ -19,12 +20,11 @@ import scala.Option;
  */
 public class GameStage extends Stage implements ContactListener {
     private World world;
-    private Ground ground;
+//    private Ground ground;
     private Runner runner;
 
     private Boolean debug = Vals.debug();
 
-    // ;)
     private TouchType touchType = TouchType.None;
 
     private Vector3 touchPoint;
@@ -33,6 +33,8 @@ public class GameStage extends Stage implements ContactListener {
 
     private final float step = 1 / 300f;
     private float accumulator = 0f;
+
+    private float ticks = Vals.ratio() * 15f;
 
     private OrthographicCamera camera;
     private Box2DDebugRenderer renderer;
@@ -43,7 +45,7 @@ public class GameStage extends Stage implements ContactListener {
         setupWorld();
         setupDebugRenderer();
         setupControlAreas();
-        createEnemy();
+//        createEnemy();
     }
 
     @Override
@@ -54,6 +56,14 @@ public class GameStage extends Stage implements ContactListener {
         world.getBodies(bodies);
         for (Body body : bodies) {
             updateBody(body);
+        }
+
+        Array<Actor> actors = getActors();
+        for (Actor actor : actors) {
+            if (!actor.isVisible() && actor instanceof GameActor && BodyHelper.bodyOnScreen(((GameActor)actor).body())) {
+                actor.setVisible(true);
+                runner.toFront();
+            }
         }
 
         accumulator += delta;
@@ -71,13 +81,13 @@ public class GameStage extends Stage implements ContactListener {
     }
 
     private void updateBody(Body body) {
-        if (!(body.getUserData() instanceof GroundUserData) && !BodyHelper.bodyOnScreen(body)) {
+        if (BodyHelper.bodyLeftBounds(body) || BodyHelper.bodyShouldBeDestroyed(body)) {
             // TODO: GameScreen transition
             if (BodyHelper.isRunner(body) && runner.hit()) {
                 Gdx.app.exit();
             }
             if (BodyHelper.isEnemy(body) && !runner.hit()) {
-                createEnemy();
+//                createEnemy();
             }
             world.destroyBody(body);
         }
@@ -89,13 +99,13 @@ public class GameStage extends Stage implements ContactListener {
 
     private void setupWorld() {
         world = WorldUtils.createWorld();
-        ground = new Ground(WorldUtils.createGround(world));
         runner = new Runner(WorldUtils.createRunner(world));
-        addActor(ground);
         addActor(new Background());
         addActor(new Grass());
         addActor(runner);
         world.setContactListener(this);
+
+        Mapper.loadActors(world, this);
     }
 
     private void setupDebugRenderer() {
@@ -173,20 +183,40 @@ public class GameStage extends Stage implements ContactListener {
     @Override
     public void beginContact(Contact contact) {
         ContactType contactType = BodyHelper.computeContactType(contact);
-        if (contactType instanceof RunnerEnemyContact) {
+        if (contactType == null) {
+            return;
+        }
+        if (contactType instanceof RunnerEnemyContact || contactType instanceof RunnerDangerContact) {
             runner.onHit(contactType.runner());
-        } else if (runner.isJumping() && BodyHelper.computeContactType(contact) instanceof RunnerGroundContact) {
+        } else if (runner.isJumping() && contactType instanceof RunnerStaticContact) {
             runner.landed();
         }
     }
 
     @Override
-    public void endContact(Contact contact) {}
+    public void endContact(Contact contact) {
+
+    }
 
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {
+        ContactType contactType = BodyHelper.computeContactType(contact);
         // After runner has been hit, let him fall through all objects
-        if (runner.hit() && !BodyHelper.continueContact(contact, runner)) {
+        if (contactType instanceof RunnerStaticContact && !runner.hit()) {
+            Vector2 norm = oldManifold.getLocalNormal();
+            System.out.println(norm);
+            if (norm.equals(new Vector2(1.0f, -0.0f))) {
+                contact.setEnabled(false);
+                runner.hit();
+            }
+        } else if (contactType instanceof PowerUpContact) {
+            PowerUpUserData powerUp = (PowerUpUserData) ((PowerUpContact) contactType).powerUp().getUserData();
+            powerUp.typ().affect(runner);
+            powerUp.markForRemoval();
+            contact.setEnabled(false);
+        } else if (runner.invincible() && BodyHelper.hasDangerousBody(contact)) {
+            contact.setEnabled(false);
+        } else if (runner.hit()) {
             contact.setEnabled(false);
         }
     }

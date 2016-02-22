@@ -1,6 +1,7 @@
 package com.bau5.cs328.sidescroller
 
 import com.badlogic.gdx.physics.box2d.{Body, Contact}
+import com.bau5.cs328.sidescroller.actors._
 
 
 /**
@@ -9,7 +10,6 @@ import com.badlogic.gdx.physics.box2d.{Body, Contact}
   * Implemented in Scala cause class matching ftw
   */
 object BodyHelper {
-
   /**
     * Determines the type of contact from the two bodies of the contact.
     *
@@ -18,11 +18,18 @@ object BodyHelper {
     */
   def computeContactType(contact: Contact): ContactType = {
     val (bodyA, bodyB) = (contact.getFixtureA.getBody, contact.getFixtureB.getBody)
+
     (bodyA.getUserData, bodyB.getUserData) match {
-      case (a: RunnerUserData, b: GroundUserData) => new RunnerGroundContact(bodyA, bodyB)
-      case (b: GroundUserData, a: RunnerUserData) => new RunnerGroundContact(bodyB, bodyA)
+      case (a: RunnerUserData, b: GroundUserData) => new RunnerStaticContact(bodyA, bodyB)
+      case (b: GroundUserData, a: RunnerUserData) => new RunnerStaticContact(bodyB, bodyA)
+      case (a: RunnerUserData, b: SimpleUserData) => new RunnerStaticContact(bodyA, bodyB)
+      case (b: SimpleUserData, a: RunnerUserData) => new RunnerStaticContact(bodyB, bodyA)
       case (a: RunnerUserData, b: EnemyUserData)  => new RunnerEnemyContact(bodyA, bodyB)
       case (b: EnemyUserData, a: RunnerUserData)  => new RunnerEnemyContact(bodyB, bodyA)
+      case (a: RunnerUserData, b: DangerousUserData)  => new RunnerDangerContact(bodyA, bodyB)
+      case (b: DangerousUserData, a: RunnerUserData)  => new RunnerDangerContact(bodyB, bodyA)
+      case (a: RunnerUserData, b: PowerUpUserData)  => new PowerUpContact(bodyA, bodyB)
+      case (b: PowerUpUserData, a: RunnerUserData)  => new PowerUpContact(bodyB, bodyA)
       case _ => NoContact
     }
   }
@@ -32,6 +39,14 @@ object BodyHelper {
     ((a, a.getUserData), (b, b.getUserData)) match {
       case ((_, _: RunnerUserData), non) => non._1
       case (non, (_, _: RunnerUserData)) => non._1
+    }
+  }
+
+  def hasDangerousBody(contact: Contact): Boolean = {
+    (contact.getFixtureA.getBody.getUserData, contact.getFixtureB.getBody.getUserData) match {
+      case (_: DangerousUserData, _) => true
+      case (_, _: DangerousUserData) => true
+      case _ => false
     }
   }
 
@@ -51,6 +66,17 @@ object BodyHelper {
     */
   def bodyOnScreen(body: Body): Boolean = body.getUserData match {
     case data : UserData => body.getPosition.x + data.width / 2 > 0 && body.getPosition.y + data.height / 2 > 0
+    case _ => false
+  }
+
+  def bodyLeftBounds(body: Body): Boolean = body.getUserData match {
+    case data : UserData => body.getPosition.x + data.width <= 0 || body.getPosition.y + data.height <= 0
+    case _ => false
+
+  }
+
+  def bodyShouldBeDestroyed(body: Body): Boolean = body.getUserData match {
+    case destroyable: Destroyable => destroyable.shouldDestroy()
     case _ => false
   }
 
@@ -77,6 +103,17 @@ object BodyHelper {
 }
 
 sealed abstract class ContactType(val runner: Body, val other: Body)
-class RunnerGroundContact(runner: Body, val ground: Body) extends ContactType(runner, ground)
+class RunnerStaticContact(runner: Body, val ground: Body) extends ContactType(runner, ground)
 class RunnerEnemyContact(runner: Body, val enemy: Body) extends ContactType(runner, enemy)
+class RunnerDangerContact(runner: Body, val danger: Body) extends ContactType(runner, danger)
+class PowerUpContact(runner: Body, val powerUp: Body) extends ContactType(runner, powerUp)
 object NoContact extends ContactType(null, null)
+
+sealed abstract class PowerUpType {
+  def affect(runner: Runner): Unit
+}
+class InvincibilityPowerUp extends PowerUpType {
+  override def affect(runner: Runner): Unit = {
+    runner.setInvincible()
+  }
+}

@@ -1,9 +1,10 @@
-package com.bau5.cs328.sidescroller
+package com.bau5.cs328.sidescroller.actors
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.{Batch, TextureRegion}
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.bau5.cs328.sidescroller.Vals
 
 /**
   * Created by Rick on 2/17/16.
