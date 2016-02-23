@@ -1,7 +1,6 @@
 package com.bau5.cs328.sidescroller.screens
 
 import com.badlogic.gdx.graphics.GL20
-import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.{Actor, Stage}
 import com.badlogic.gdx.{Gdx, Screen}
 import com.bau5.cs328.sidescroller.actors.environment.{Background, Grass}
@@ -30,11 +29,11 @@ class MenuScreen(main: Main) extends BaseScreen {
   override def render(delta: Float): Unit = {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
     val batch = stage.getBatch
-    batch.begin()
-    StageWithButtons.font.draw(batch, "Sprinter!", Vals.screenWidth - 20, Vals.screenHeight * 0.9f)
-    batch.end()
     stage.draw()
     stage.act(delta)
+    batch.begin()
+    StageWithButtons.font.draw(batch, "Sprinter!", Vals.screenWidth / 2 - 70, Vals.screenHeight * 0.9f)
+    batch.end()
   }
 }
 

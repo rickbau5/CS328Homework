@@ -143,6 +143,7 @@ public class GameStage extends Stage {
 
     @Override
     public boolean keyDown(int keyCode) {
+        if (hasWon() || runner.hit()) return false;
         if (keyCode == Input.Keys.SPACE) {
             runner.jump();
             touchType = TouchType.Jump;
@@ -157,6 +158,7 @@ public class GameStage extends Stage {
 
     @Override
     public boolean keyUp(int keyCode) {
+        if (hasWon() || runner.hit()) return false;
         if (keyCode == Input.Keys.D && runner.isDodging()) {
             runner.stopDodge();
             touchType = TouchType.None;

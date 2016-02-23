@@ -1,7 +1,7 @@
 package com.bau5.cs328.sidescroller.actors
 
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.{Batch, TextureRegion}
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.g2d.{Animation, TextureRegion, TextureAtlas, Batch}
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.bau5.cs328.sidescroller.GameStage
@@ -11,12 +11,25 @@ import com.bau5.cs328.sidescroller.utils.Vals
   * Created by Rick on 2/22/2016.
   */
 class Runner(body: Body) extends GameActor(body, Option.empty[RunnerUserData]) {
-  private val textureRegion = GameStage.atlas.findRegion("first")
+  private val atlas = new TextureAtlas("textures/player.pack")
+  private val dodgingTexture = atlas.findRegion("dodge")
+  private val hitTexture = atlas.findRegion("hurt")
+  private val standingTexture = atlas.findRegion("standing")
+  private val jumpingTexture = atlas.findRegion("jumping")
+  private val running = {
+    val frames = new com.badlogic.gdx.utils.Array[TextureRegion]
+    for (i <- 1 to 3) {
+      frames.add(atlas.findRegion(s"walking$i"))
+    }
+    new Animation(0.1f, frames)
+  }
+
   private var jumping = false
   private var dodging = false
   var hit = false
   private var collider = Option.empty[Body]
   private var invincibilityTimer = 0
+  private var time = 0f
 
   def jump(): Unit = !(jumping || dodging || hit) match {
     case true =>
@@ -74,13 +87,33 @@ class Runner(body: Body) extends GameActor(body, Option.empty[RunnerUserData]) {
   override def draw(batch: Batch, parentAlpha: Float): Unit = {
     super.draw(batch, parentAlpha)
     val angle = (body.getAngle / (Math.PI / 180f)).toFloat
-    batch.draw(textureRegion,
-      screenRectangle.x, screenRectangle.y,
-      screenRectangle.width / 2, screenRectangle.height / 2,
-      screenRectangle.width, screenRectangle.height,
-      1, 1.1f,
-      angle
-    )
+    if (GameStage.hasWon) {
+      batch.draw(standingTexture,
+        screenRectangle.x, screenRectangle.y,
+        screenRectangle.width / 2, screenRectangle.height / 2,
+        screenRectangle.width, screenRectangle.height,
+        1, 1.1f,
+        0
+      )
+    } else if (dodging || hit || jumping) {
+      val texture = if (dodging) {
+        dodgingTexture
+      } else if (hit) {
+        hitTexture
+      } else {
+        jumpingTexture
+      }
+      batch.draw(texture,
+        screenRectangle.x, screenRectangle.y,
+        screenRectangle.width / 2, screenRectangle.height / 2,
+        screenRectangle.width, screenRectangle.height,
+        1, 1.1f,
+        angle
+      )
+    } else {
+      batch.draw(running.getKeyFrame(time, true), screenRectangle.x, screenRectangle.y, screenRectangle.width, screenRectangle.height)
+      time += Gdx.graphics.getDeltaTime
+    }
   }
 
   override def act(delta: Float): Unit = {
