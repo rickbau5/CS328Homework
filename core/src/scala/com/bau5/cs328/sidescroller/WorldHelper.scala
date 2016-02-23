@@ -6,12 +6,10 @@ import com.bau5.cs328.sidescroller.actors.{EnemyUserData, RunnerUserData, Simple
 
 import scala.util.Random
 
-
 /**
   * Created by Rick on 2/9/16.
   */
 object WorldUtils {
-
   def createWorld(): World = new World(Vals.gravity, true)
 
   /**
@@ -41,7 +39,7 @@ object WorldUtils {
     val bodyDef = new BodyDef()
     // That moment when Java people use Scala reserved keywords...
     bodyDef.`type` = BodyDef.BodyType.DynamicBody
-    bodyDef.position.set(new Vector2(Vals.runnerX, Vals.runnerY))
+    bodyDef.position.set(new Vector2(Vals.runnerX, Vals.runnerY + 1))
     val shape = new PolygonShape()
     shape.setAsBox(Vals.runnerWidth / 2, Vals.runnerHeight / 2)
     val body = forWorld.createBody(bodyDef)

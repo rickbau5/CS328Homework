@@ -1,8 +1,9 @@
-package com.bau5.cs328.sidescroller
+package com.bau5.cs328.sidescroller.utils
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d.World
 import com.bau5.cs328.sidescroller.actors._
+import com.bau5.cs328.sidescroller.{GameStage, Vals, WorldUtils}
 
 import scala.io.Source
 
@@ -16,7 +17,7 @@ object Mapper {
   var lastChunk = 0
 
   def loadActors(world: World, stage: GameStage): Unit = {
-    val lines = Source.fromFile(Gdx.files.internal("map.txt").path())
+    val lines = Source.fromFile(Gdx.files.internal("maps/map.txt").path())
       .getLines()
       .toList
       .reverse

@@ -1,7 +1,8 @@
 package com.bau5.cs328.sidescroller.actors
 
 import com.badlogic.gdx.math.Vector2
-import com.bau5.cs328.sidescroller.{PowerUpType, Vals}
+import com.bau5.cs328.sidescroller.Vals
+import com.bau5.cs328.sidescroller.utils.PowerUpType
 
 /**
   * Created by Rick on 2/20/16.

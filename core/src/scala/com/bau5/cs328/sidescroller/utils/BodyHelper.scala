@@ -1,4 +1,4 @@
-package com.bau5.cs328.sidescroller
+package com.bau5.cs328.sidescroller.utils
 
 import com.badlogic.gdx.physics.box2d.{Body, Contact}
 import com.bau5.cs328.sidescroller.actors._

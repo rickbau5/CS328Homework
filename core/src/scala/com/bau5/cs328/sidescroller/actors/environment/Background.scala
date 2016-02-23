@@ -1,4 +1,4 @@
-package com.bau5.cs328.sidescroller.actors
+package com.bau5.cs328.sidescroller.actors.environment
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture

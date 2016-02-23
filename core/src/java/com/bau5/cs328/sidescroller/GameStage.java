@@ -13,6 +13,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.bau5.cs328.sidescroller.actors.*;
+import com.bau5.cs328.sidescroller.actors.environment.Background;
+import com.bau5.cs328.sidescroller.actors.environment.Grass;
+import com.bau5.cs328.sidescroller.utils.*;
 
 
 /**
@@ -34,8 +37,6 @@ public class GameStage extends Stage implements ContactListener {
     private final float step = 1 / 300f;
     private float accumulator = 0f;
 
-    private float ticks = Vals.ratio() * 15f;
-
     private OrthographicCamera camera;
     private Box2DDebugRenderer renderer;
 
@@ -45,7 +46,6 @@ public class GameStage extends Stage implements ContactListener {
         setupWorld();
         setupDebugRenderer();
         setupControlAreas();
-//        createEnemy();
     }
 
     @Override
@@ -82,10 +82,6 @@ public class GameStage extends Stage implements ContactListener {
 
     private void updateBody(Body body) {
         if (BodyHelper.bodyLeftBounds(body) || BodyHelper.bodyShouldBeDestroyed(body)) {
-            // TODO: GameScreen transition
-            if (BodyHelper.isRunner(body) && runner.hit()) {
-                Gdx.app.exit();
-            }
             if (BodyHelper.isEnemy(body) && !runner.hit()) {
 //                createEnemy();
             }
@@ -204,10 +200,10 @@ public class GameStage extends Stage implements ContactListener {
         // After runner has been hit, let him fall through all objects
         if (contactType instanceof RunnerStaticContact && !runner.hit()) {
             Vector2 norm = oldManifold.getLocalNormal();
-            System.out.println(norm);
-            if (norm.equals(new Vector2(1.0f, -0.0f))) {
+            if (norm.equals(new Vector2(1.0f, -0.0f)) && contactType.other().getPosition().x > contactType.runner().getPosition().x) {
+                System.out.println("Hit? " + norm);
                 contact.setEnabled(false);
-                runner.hit();
+                runner.onHit(contactType.other());
             }
         } else if (contactType instanceof PowerUpContact) {
             PowerUpUserData powerUp = (PowerUpUserData) ((PowerUpContact) contactType).powerUp().getUserData();

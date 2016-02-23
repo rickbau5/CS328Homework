@@ -28,10 +28,10 @@ object Vals {
   val runnerWidth = 0.9f
   val runnerHeight = 1.8f
   val runnerY = groundTop - runnerHeight / 2
-  val runnerDensity = 0.7f
+  val runnerDensity = 1.0f
   val runnerDodgeX = runnerX
   val runnerDodgeY = runnerY - runnerWidth / 2
-  val runnerJumpImpulse = new Vector2(0.0f, 7.0f)
+  val runnerJumpImpulse = new Vector2(0.0f, 12.0f)
   val runnerHitImpulse = 7f
 
   val enemyLinearVelocity = new Vector2(-10f, 0)

@@ -52,96 +52,6 @@ abstract class GameActor[T <: UserData](val body: Body, data: Option[T]) extends
   def transform(num: Float) = Vals.ratio * num
 }
 
-class Runner(body: Body) extends GameActor(body, Option.empty[RunnerUserData]) {
-  private val textureRegion = new TextureRegion(new Texture("first.png"))
-  private var jumping = false
-  private var dodging = false
-  var hit = false
-  private var collider = Option.empty[Body]
-  private var invincibilityTimer = 0
-
-  def jump(): Unit = !(jumping || dodging || hit) match {
-    case true =>
-      --> { data =>
-        val diff = data.jumpImpulse.y - body.getLinearVelocity.y
-        if (diff > 0) {
-          body.applyLinearImpulse(new Vector2(0, diff), body.getWorldCenter, true)
-        }
-      }
-      jumping = true
-    case false => ;
-  }
-
-  def dodge(): Unit = !(jumping || hit) match {
-    case true =>
-      body.setAngularDamping(1.0f)
-      --> (data => body.setTransform(data.dodgeTransform(body.getPosition.sub(0.0f, data.w / 2)), data.dodgeAngle))
-      dodging = true
-    case false => ;
-  }
-
-  def stopDodge(): Unit = {
-    if (!hit) {
-      --> (data => body.setTransform(data.runningTransform(body.getPosition), 0f))
-    }
-    dodging = false
-  }
-
-  def isDodging: Boolean = dodging
-  def isJumping: Boolean = jumping
-
-  def onHit(body: Body): Unit = invincible() || hit match {
-    case false =>
-      collider = Option(body)
-      // Re-enable angular velocity for the body
-      --> (data => body.applyAngularImpulse(data.hitImpulse, true))
-      hit = true
-    case _ => ;
-  }
-
-  def setLocation(screenCoord: Vector2): Unit = {
-    --> (data => body.setTransform(new Vector2(screenCoord.x / Vals.ratio, screenCoord.y / Vals.ratio), 0))
-  }
-
-  def getCollider: Option[Body] = collider
-
-  def landed(): Unit = jumping = false
-
-  def setInvincible(): Unit = {
-    invincibilityTimer = 200
-  }
-
-  def invincible(): Boolean = invincibilityTimer > 0
-
-  override def draw(batch: Batch, parentAlpha: Float): Unit = {
-    super.draw(batch, parentAlpha)
-    if (!(hit || dodging) && body.getAngle != 0) {
-      body.setTransform(body.getPosition, 0)
-    }
-    val angle = (body.getAngle / (Math.PI / 180f)).toFloat
-    batch.draw(textureRegion,
-      screenRectangle.x, screenRectangle.y,
-      screenRectangle.width / 2, screenRectangle.height / 2,
-      screenRectangle.width, screenRectangle.height,
-      1, 1.1f,
-      angle
-    )
-  }
-
-  override def act(delta: Float): Unit = {
-    super.act(delta)
-    //cancel x velocity, want the runner to stay in position.
-    body.setLinearVelocity(new Vector2(0, body.getLinearVelocity.y))
-    if (invincibilityTimer > 0) {
-      invincibilityTimer -= 1
-      if (invincibilityTimer == 0) println("No longer invincible. " + invincible())
-    }
-    if (body.getPosition.x != Vals.runnerX) {
-      body.setTransform(new Vector2(Vals.runnerX, body.getPosition.y), body.getAngle)
-    }
-  }
-}
-
 class Enemy(body: Body) extends GameActor(body, Option.empty[EnemyUserData]) {
   private val textureRegion = new TextureRegion(new Texture("first.png"))
   override def act(delta: Float): Unit = {
@@ -158,5 +68,3 @@ class Enemy(body: Body) extends GameActor(body, Option.empty[EnemyUserData]) {
     batch.draw(textureRegion, x, y, width, screenRectangle.height)
   }
 }
-
-class Ground(body: Body) extends GameActor(body, Option(new GroundUserData(Vals.groundWidth, Vals.groundHeight)))
