@@ -3,7 +3,7 @@ package com.bau5.cs328.sidescroller.utils
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.physics.box2d.World
 import com.bau5.cs328.sidescroller.actors._
-import com.bau5.cs328.sidescroller.{GameStage, Vals, WorldUtils}
+import com.bau5.cs328.sidescroller.{GameStage, Vals, WorldHelper}
 
 import scala.io.Source
 
@@ -28,8 +28,8 @@ object Mapper {
           case 'g' => TexturedCollidable(world, x, y, "grassCliffLeft.png")
           case '-' => TexturedCollidable(world, x, y, "grass.png")
           case 'G' => TexturedCollidable(world, x, y, "grassCliffRight.png")
-          case 's' => new DangerousCollidable(WorldUtils.createSimpleBody(world, x, y - 0.25f, 1, 0.5f), "spikes.png", 1, 0.5f)
-          case 'r' => new DangerousCollidable(WorldUtils.createSimpleBody(world, x, y - 0.25f, 1, 0.5f), "rock.png", 1, 0.5f)
+          case 's' => new DangerousCollidable(WorldHelper.createSimpleBody(world, x, y - 0.25f, 1, 0.5f), "spikes.png", 1, 0.5f, 1, 2)
+          case 'r' => new DangerousCollidable(WorldHelper.createSimpleBody(world, x, y, 1, 1), "rock.png", 1, 1, 1, 2)
           case 'i' => TexturedCollidable(world, x, y, 2, 2, "star.png", Option(new PowerUpUserData(1, 1, new InvincibilityPowerUp)))
           case ' ' => null
         })

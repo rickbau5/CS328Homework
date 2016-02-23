@@ -1,8 +1,6 @@
 package com.bau5.cs328.sidescroller.actors
 
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.{Batch, TextureRegion}
-import com.badlogic.gdx.math.{Rectangle, Vector2}
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.bau5.cs328.sidescroller.Vals
@@ -50,21 +48,4 @@ abstract class GameActor[T <: UserData](val body: Body, data: Option[T]) extends
   }
 
   def transform(num: Float) = Vals.ratio * num
-}
-
-class Enemy(body: Body) extends GameActor(body, Option.empty[EnemyUserData]) {
-  private val textureRegion = new TextureRegion(new Texture("first.png"))
-  override def act(delta: Float): Unit = {
-    --> (data => body.setLinearVelocity(data.linearVelocity))
-  }
-
-  override def draw(batch: Batch, parentAlpha: Float): Unit = {
-    super.draw(batch, parentAlpha)
-    val x = screenRectangle.x - (screenRectangle.width * 0.1f)
-    val y = screenRectangle.y + screenRectangle.width / 2
-    val width = screenRectangle.width * 1.2f
-
-    println("Drawing enemy at %f %f", x, y)
-    batch.draw(textureRegion, x, y, width, screenRectangle.height)
-  }
 }

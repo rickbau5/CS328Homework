@@ -2,16 +2,16 @@ package com.bau5.cs328.sidescroller.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.{OrthographicCamera, Texture, Pixmap, Color}
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter
-import com.badlogic.gdx.scenes.scene2d.{Actor, Stage}
+import com.badlogic.gdx.graphics.{Color, OrthographicCamera, Pixmap, Texture}
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle
-import com.badlogic.gdx.scenes.scene2d.ui.{TextButton, Table, Skin}
+import com.badlogic.gdx.scenes.scene2d.ui.{Skin, Table, TextButton}
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent
+import com.badlogic.gdx.scenes.scene2d.{Actor, Stage}
 import com.badlogic.gdx.utils.viewport.StretchViewport
-import com.bau5.cs328.sidescroller.Vals
+import com.bau5.cs328.sidescroller.{Main, Vals}
 
 /**
   * Created by Rick on 2/22/2016.
@@ -59,28 +59,13 @@ object StageWithButtons {
     Gdx.input.setInputProcessor(temp)
     temp
   }
-  def createStage(buttons: ButtonWithListener*): Stage = {
-    val temp = new Stage(
-      new StretchViewport(
-        Vals.screenWidth,
-        Vals.screenHeight,
-        new OrthographicCamera(Vals.screenWidth, Vals.screenHeight)
-      )
-    )
-    val table = new Table
-    table.setFillParent(true)
-    temp.addActor(table)
-    buttons.foreach { button =>
-      table.add(button)
-      table.row()
-    }
-
-    Gdx.input.setInputProcessor(temp)
-
-    temp
-  }
 }
 
+object ButtonWithListener {
+  def mainMenuButton(main: Main): ButtonWithListener = {
+    new ButtonWithListener("Main Menu", StageWithButtons.buttonSkin, () => main.transitionToScreen(new MenuScreen(main)))
+  }
+}
 class ButtonWithListener(text: String, skin: Skin, listenerCallback: () => Unit) extends TextButton(text, skin) {
   addListener(new ButtonListener(listenerCallback))
 }

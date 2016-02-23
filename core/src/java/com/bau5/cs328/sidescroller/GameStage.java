@@ -4,27 +4,33 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.bau5.cs328.sidescroller.actors.*;
 import com.bau5.cs328.sidescroller.actors.environment.Background;
 import com.bau5.cs328.sidescroller.actors.environment.Grass;
+import com.bau5.cs328.sidescroller.screens.ButtonListener;
+import com.bau5.cs328.sidescroller.screens.ButtonWithListener;
+import com.bau5.cs328.sidescroller.screens.StageWithButtons;
 import com.bau5.cs328.sidescroller.utils.*;
+import scala.Function0;
 
 
 /**
  * Created by Rick on 2/9/16.
  */
-public class GameStage extends Stage implements ContactListener {
+public class GameStage extends Stage {
+    private Main main;
+
     private World world;
-//    private Ground ground;
-    private Runner runner;
+    private static Runner runner;
 
     private Boolean debug = Vals.debug();
 
@@ -40,9 +46,10 @@ public class GameStage extends Stage implements ContactListener {
     private OrthographicCamera camera;
     private Box2DDebugRenderer renderer;
 
-    public GameStage() {
+    public GameStage(Main main) {
         super(new ScalingViewport(Scaling.stretch, Vals.screenWidth(), Vals.screenHeight(),
                     new OrthographicCamera(Vals.screenWidth(), Vals.screenHeight())));
+        this.main = main;
         setupWorld();
         setupDebugRenderer();
         setupControlAreas();
@@ -82,24 +89,27 @@ public class GameStage extends Stage implements ContactListener {
 
     private void updateBody(Body body) {
         if (BodyHelper.bodyLeftBounds(body) || BodyHelper.bodyShouldBeDestroyed(body)) {
-            if (BodyHelper.isEnemy(body) && !runner.hit()) {
-//                createEnemy();
+            if (body.getUserData() instanceof RunnerUserData) {
+                System.out.println("runner leaving screen.");
             }
             world.destroyBody(body);
         }
     }
 
-    private void createEnemy() {
-        addActor(new Enemy(WorldUtils.createEnemy(world)));
+    public void onRunnerHit() {
+        Table table = new Table();
+        table.setFillParent(true);
+        addActor(table);
+        table.add(ButtonWithListener.mainMenuButton(main));
     }
 
     private void setupWorld() {
-        world = WorldUtils.createWorld();
-        runner = new Runner(WorldUtils.createRunner(world));
+        world = WorldHelper.createWorld();
+        runner = new Runner(WorldHelper.createRunnerBody(world));
         addActor(new Background());
-        addActor(new Grass());
+        addActor(new Grass(true));
         addActor(runner);
-        world.setContactListener(this);
+        world.setContactListener(new ContactHandler(runner, this));
 
         Mapper.loadActors(world, this);
     }
@@ -116,6 +126,10 @@ public class GameStage extends Stage implements ContactListener {
         screenRight = new Rectangle(getCamera().viewportWidth / 2, 0, getCamera().viewportWidth / 2, getCamera().viewportHeight);
         screenLeft = new Rectangle(0, 0,  getCamera().viewportWidth / 2, getCamera().viewportHeight);
         Gdx.input.setInputProcessor(this);
+    }
+
+    public static Runner getRunner() {
+        return runner;
     }
 
     @Override
@@ -174,51 +188,13 @@ public class GameStage extends Stage implements ContactListener {
         if (debug) {
             renderer.render(world, camera.combined);
         }
-    }
-
-    @Override
-    public void beginContact(Contact contact) {
-        ContactType contactType = BodyHelper.computeContactType(contact);
-        if (contactType == null) {
-            return;
-        }
-        if (contactType instanceof RunnerEnemyContact || contactType instanceof RunnerDangerContact) {
-            runner.onHit(contactType.runner());
-        } else if (runner.isJumping() && contactType instanceof RunnerStaticContact) {
-            runner.landed();
+        if (runner.hit()) {
+            this.getBatch().begin();
+            StageWithButtons.font().draw(this.getBatch(), new StringBuilder("Game over!").subSequence(0, 10),
+                    Vals.screenWidth() / 2 - 80, (int)(Vals.screenHeight() * 0.75));
+            this.getBatch().end();
         }
     }
-
-    @Override
-    public void endContact(Contact contact) {
-
-    }
-
-    @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {
-        ContactType contactType = BodyHelper.computeContactType(contact);
-        // After runner has been hit, let him fall through all objects
-        if (contactType instanceof RunnerStaticContact && !runner.hit()) {
-            Vector2 norm = oldManifold.getLocalNormal();
-            if (norm.equals(new Vector2(1.0f, -0.0f)) && contactType.other().getPosition().x > contactType.runner().getPosition().x) {
-                System.out.println("Hit? " + norm);
-                contact.setEnabled(false);
-                runner.onHit(contactType.other());
-            }
-        } else if (contactType instanceof PowerUpContact) {
-            PowerUpUserData powerUp = (PowerUpUserData) ((PowerUpContact) contactType).powerUp().getUserData();
-            powerUp.typ().affect(runner);
-            powerUp.markForRemoval();
-            contact.setEnabled(false);
-        } else if (runner.invincible() && BodyHelper.hasDangerousBody(contact)) {
-            contact.setEnabled(false);
-        } else if (runner.hit()) {
-            contact.setEnabled(false);
-        }
-    }
-
-    @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {}
 }
 
 enum TouchType {

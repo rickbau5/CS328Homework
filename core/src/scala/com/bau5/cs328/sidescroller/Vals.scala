@@ -14,6 +14,7 @@ object Vals {
   val debugWidth = 20
   val debugHeight = 13
   val debug = true
+  val freeze = true
 
   val gravity = new Vector2(0, -10f)
 
@@ -33,14 +34,4 @@ object Vals {
   val runnerDodgeY = runnerY - runnerWidth / 2
   val runnerJumpImpulse = new Vector2(0.0f, 12.0f)
   val runnerHitImpulse = 7f
-
-  val enemyLinearVelocity = new Vector2(-10f, 0)
-  val enemyX = 25f
-  val enemyDensity = 0.5f
-  val enemyShortY = groundTop + 0.5f
-  val enemyLongY = groundTop + 1f
-  val enemyFlyingY = groundTop + 2f
-
-  val simpleEnemyX = 25f
-  val simpleEnemyY = groundTop
 }

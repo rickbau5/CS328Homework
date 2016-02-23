@@ -32,9 +32,6 @@ case class RunnerUserData(w: Float, h: Float) extends UserData(w, h) {
   val jumpImpulse = Vals.runnerJumpImpulse
 }
 case class PowerUpUserData(w: Float, h: Float, typ: PowerUpType) extends UserData(w, h) with Destroyable
-case class EnemyUserData(w: Float, h: Float) extends UserData(w, h) {
-  val linearVelocity = Vals.enemyLinearVelocity
-}
 case class DangerousUserData(w: Float, h: Float) extends UserData(w, h)
 
 trait Destroyable {

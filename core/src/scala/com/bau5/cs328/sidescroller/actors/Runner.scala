@@ -7,7 +7,7 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.bau5.cs328.sidescroller.Vals
 
 /**
-  * Created by bau5 on 2/22/2016.
+  * Created by Rick on 2/22/2016.
   */
 class Runner(body: Body) extends GameActor(body, Option.empty[RunnerUserData]) {
   private val textureRegion = new TextureRegion(new Texture("first.png"))
@@ -47,13 +47,15 @@ class Runner(body: Body) extends GameActor(body, Option.empty[RunnerUserData]) {
   def isDodging: Boolean = dodging
   def isJumping: Boolean = jumping
 
-  def onHit(body: Body): Unit = invincible() || hit match {
+  def onHit(body: Body): Boolean = invincible() || hit match {
     case false =>
       collider = Option(body)
       // Re-enable angular velocity for the body
       --> (data => body.applyAngularImpulse(data.hitImpulse, true))
+      body.applyLinearImpulse(new Vector2(8, 0), body.getWorldCenter, true)
       hit = true
-    case _ => ;
+      true
+    case _ => false
   }
 
   def setLocation(screenCoord: Vector2): Unit = {
@@ -88,7 +90,13 @@ class Runner(body: Body) extends GameActor(body, Option.empty[RunnerUserData]) {
     if (!(hit || dodging) && body.getAngle != 0) {
       body.setTransform(body.getPosition, 0)
     }
-    body.setLinearVelocity(new Vector2(0, body.getLinearVelocity.y))
+    if (jumping && body.getLinearVelocity.y > Vals.runnerJumpImpulse.y) {
+      body.setLinearVelocity(new Vector2(body.getLinearVelocity.x, Vals.runnerJumpImpulse.y))
+      println("Correcting...")
+    }
+    if (!hit) {
+      body.setLinearVelocity(new Vector2(0, body.getLinearVelocity.y))
+    }
     if (invincibilityTimer > 0) {
       invincibilityTimer -= 1
       if (invincibilityTimer == 0) println("No longer invincible. " + invincible())

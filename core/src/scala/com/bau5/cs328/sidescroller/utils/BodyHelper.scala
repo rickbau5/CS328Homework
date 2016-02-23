@@ -24,21 +24,11 @@ object BodyHelper {
       case (b: GroundUserData, a: RunnerUserData) => new RunnerStaticContact(bodyB, bodyA)
       case (a: RunnerUserData, b: SimpleUserData) => new RunnerStaticContact(bodyA, bodyB)
       case (b: SimpleUserData, a: RunnerUserData) => new RunnerStaticContact(bodyB, bodyA)
-      case (a: RunnerUserData, b: EnemyUserData)  => new RunnerEnemyContact(bodyA, bodyB)
-      case (b: EnemyUserData, a: RunnerUserData)  => new RunnerEnemyContact(bodyB, bodyA)
-      case (a: RunnerUserData, b: DangerousUserData)  => new RunnerDangerContact(bodyA, bodyB)
-      case (b: DangerousUserData, a: RunnerUserData)  => new RunnerDangerContact(bodyB, bodyA)
-      case (a: RunnerUserData, b: PowerUpUserData)  => new PowerUpContact(bodyA, bodyB)
-      case (b: PowerUpUserData, a: RunnerUserData)  => new PowerUpContact(bodyB, bodyA)
+      case (a: RunnerUserData, b: DangerousUserData) => new RunnerDangerContact(bodyA, bodyB)
+      case (b: DangerousUserData, a: RunnerUserData) => new RunnerDangerContact(bodyB, bodyA)
+      case (a: RunnerUserData, b: PowerUpUserData) => new PowerUpContact(bodyA, bodyB)
+      case (b: PowerUpUserData, a: RunnerUserData) => new PowerUpContact(bodyB, bodyA)
       case _ => NoContact
-    }
-  }
-
-  def getNonRunner(contact: Contact): Body = {
-    val (a, b) = (contact.getFixtureA.getBody, contact.getFixtureB.getBody)
-    ((a, a.getUserData), (b, b.getUserData)) match {
-      case ((_, _: RunnerUserData), non) => non._1
-      case (non, (_, _: RunnerUserData)) => non._1
     }
   }
 
@@ -46,14 +36,6 @@ object BodyHelper {
     (contact.getFixtureA.getBody.getUserData, contact.getFixtureB.getBody.getUserData) match {
       case (_: DangerousUserData, _) => true
       case (_, _: DangerousUserData) => true
-      case _ => false
-    }
-  }
-
-  def continueContact(contact: Contact, runner: Runner): Boolean = {
-    (contact.getFixtureA.getBody, contact.getFixtureB.getBody) match {
-      case (r, o) if isRunner(r) && runner.getCollider.map(_ == o).get => true
-      case (o, r) if isRunner(r) && runner.getCollider.map(_ == o).get => true
       case _ => false
     }
   }
@@ -77,17 +59,6 @@ object BodyHelper {
 
   def bodyShouldBeDestroyed(body: Body): Boolean = body.getUserData match {
     case destroyable: Destroyable => destroyable.shouldDestroy()
-    case _ => false
-  }
-
-  /**
-    * Check if body is an enemy, accesses the user data field.
-    *
-    * @param body Body in question
-    * @return True if enemy, false otherwise
-    */
-  def isEnemy(body: Body): Boolean = body.getUserData match {
-    case _ : EnemyUserData => true
     case _ => false
   }
 
