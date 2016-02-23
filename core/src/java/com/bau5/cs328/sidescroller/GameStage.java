@@ -41,7 +41,7 @@ public class GameStage extends Stage {
 
     private static boolean win = false;
 
-    public static TextureAtlas atlas = new TextureAtlas("textures/Textures.pack");
+    public static TextureAtlas atlas = new TextureAtlas("textures/textures.pack");
 
     public GameStage(Main main) {
         super(new ScalingViewport(Scaling.stretch, Vals.screenWidth(), Vals.screenHeight(),
