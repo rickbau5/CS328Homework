@@ -8,9 +8,11 @@ import com.bau5.cs328.sidescroller.screens.MenuScreen
   */
 class Main extends Game {
   var first = true
+
   override def create(): Unit = {
     transitionToScreen(new MenuScreen(this))
   }
+
   def transitionToScreen(screen: Screen): Unit = {
     Option(getScreen).foreach(_.dispose())
     setScreen(screen)

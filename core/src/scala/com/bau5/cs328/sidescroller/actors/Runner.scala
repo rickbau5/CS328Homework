@@ -4,13 +4,14 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.{Batch, TextureRegion}
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
-import com.bau5.cs328.sidescroller.Vals
+import com.bau5.cs328.sidescroller.GameStage
+import com.bau5.cs328.sidescroller.utils.Vals
 
 /**
   * Created by Rick on 2/22/2016.
   */
 class Runner(body: Body) extends GameActor(body, Option.empty[RunnerUserData]) {
-  private val textureRegion = new TextureRegion(new Texture("first.png"))
+  private val textureRegion = GameStage.atlas.findRegion("first")
   private var jumping = false
   private var dodging = false
   var hit = false
@@ -66,11 +67,9 @@ class Runner(body: Body) extends GameActor(body, Option.empty[RunnerUserData]) {
 
   def landed(): Unit = jumping = false
 
-  def setInvincible(): Unit = {
-    invincibilityTimer = 200
-  }
-
   def invincible(): Boolean = invincibilityTimer > 0
+
+  def setInvincibilityTimer(time: Int): Unit = invincibilityTimer = time
 
   override def draw(batch: Batch, parentAlpha: Float): Unit = {
     super.draw(batch, parentAlpha)
@@ -90,16 +89,14 @@ class Runner(body: Body) extends GameActor(body, Option.empty[RunnerUserData]) {
     if (!(hit || dodging) && body.getAngle != 0) {
       body.setTransform(body.getPosition, 0)
     }
-    if (jumping && body.getLinearVelocity.y > Vals.runnerJumpImpulse.y) {
-      body.setLinearVelocity(new Vector2(body.getLinearVelocity.x, Vals.runnerJumpImpulse.y))
-      println("Correcting...")
+    if (body.getLinearVelocity.y > 7) {
+      body.setLinearVelocity(new Vector2(body.getLinearVelocity.x, 7))
     }
     if (!hit) {
       body.setLinearVelocity(new Vector2(0, body.getLinearVelocity.y))
     }
     if (invincibilityTimer > 0) {
       invincibilityTimer -= 1
-      if (invincibilityTimer == 0) println("No longer invincible. " + invincible())
     }
     if (body.getPosition.x != Vals.runnerX) {
       body.setTransform(new Vector2(Vals.runnerX, body.getPosition.y), body.getAngle)

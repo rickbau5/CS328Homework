@@ -4,7 +4,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.{Batch, TextureRegion}
 import com.badlogic.gdx.physics.box2d.{Body, World}
-import com.bau5.cs328.sidescroller.{Vals, GameStage, WorldHelper}
+import com.bau5.cs328.sidescroller.utils.{WorldHelper, Vals}
+import com.bau5.cs328.sidescroller.GameStage
 
 /**
   * Created by Rick on 2/20/16.
@@ -13,7 +14,7 @@ class CollidableActor[D <: UserData](body: Body, w: Float, h: Float, d: Option[D
   override def act(delta: Float): Unit = {
     super.act(delta)
     val pos = body.getPosition
-    if (!GameStage.getRunner.hit && !Vals.freeze) {
+    if (!GameStage.getRunner.hit && !Vals.freeze && !GameStage.hasWon) {
       body.setTransform(pos.add(-7f * delta, 0), 0)
     }
   }
@@ -35,7 +36,7 @@ object TexturedCollidable {
   }
 }
 class TexturedCollidable[D <: UserData](body: Body, texturePath: String, w: Float, h: Float, scaleX: Float, scaleY: Float, d: Option[D]) extends CollidableActor(body, w, h, d) {
-  val textureRegion = new TextureRegion(new Texture(Gdx.files.internal(texturePath)))
+  val textureRegion = GameStage.atlas.findRegion(texturePath)
 
   override def draw(batch: Batch, parentAlpha: Float): Unit = {
     super.draw(batch, parentAlpha)

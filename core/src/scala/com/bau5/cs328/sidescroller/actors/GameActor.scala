@@ -3,7 +3,7 @@ package com.bau5.cs328.sidescroller.actors
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.bau5.cs328.sidescroller.Vals
+import com.bau5.cs328.sidescroller.utils.Vals
 
 
 /**

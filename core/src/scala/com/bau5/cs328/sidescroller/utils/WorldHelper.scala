@@ -1,4 +1,4 @@
-package com.bau5.cs328.sidescroller
+package com.bau5.cs328.sidescroller.utils
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.{Body, BodyDef, PolygonShape, World}

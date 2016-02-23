@@ -28,6 +28,8 @@ object BodyHelper {
       case (b: DangerousUserData, a: RunnerUserData) => new RunnerDangerContact(bodyB, bodyA)
       case (a: RunnerUserData, b: PowerUpUserData) => new PowerUpContact(bodyA, bodyB)
       case (b: PowerUpUserData, a: RunnerUserData) => new PowerUpContact(bodyB, bodyA)
+      case (a: RunnerUserData, b: ExitUserData) => new ExitContact(bodyA, bodyB)
+      case (b: ExitUserData, a: RunnerUserData) => new ExitContact(bodyB, bodyA)
       case _ => NoContact
     }
   }
@@ -78,6 +80,7 @@ class RunnerStaticContact(runner: Body, val ground: Body) extends ContactType(ru
 class RunnerEnemyContact(runner: Body, val enemy: Body) extends ContactType(runner, enemy)
 class RunnerDangerContact(runner: Body, val danger: Body) extends ContactType(runner, danger)
 class PowerUpContact(runner: Body, val powerUp: Body) extends ContactType(runner, powerUp)
+class ExitContact(runner: Body, val exit: Body) extends ContactType(runner, exit)
 object NoContact extends ContactType(null, null)
 
 sealed abstract class PowerUpType {
@@ -85,6 +88,6 @@ sealed abstract class PowerUpType {
 }
 class InvincibilityPowerUp extends PowerUpType {
   override def affect(runner: Runner): Unit = {
-    runner.setInvincible()
+    runner.setInvincibilityTimer(200)
   }
 }

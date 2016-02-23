@@ -1,0 +1,75 @@
+
+Textures.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+ground
+  rotate: false
+  xy: 1, 1
+  size: 800, 228
+  orig: 800, 228
+  offset: 0, 0
+  index: -1
+first
+  rotate: false
+  xy: 803, 148
+  size: 61, 81
+  orig: 61, 81
+  offset: 0, 0
+  index: -1
+grass
+  rotate: false
+  xy: 866, 159
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+grassCliffLeft
+  rotate: false
+  xy: 938, 159
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+grassCliffRight
+  rotate: false
+  xy: 803, 76
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+rock
+  rotate: false
+  xy: 803, 4
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+signExit
+  rotate: false
+  xy: 875, 87
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+signRight
+  rotate: false
+  xy: 875, 15
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+spikes
+  rotate: false
+  xy: 947, 87
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+star
+  rotate: false
+  xy: 947, 15
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1

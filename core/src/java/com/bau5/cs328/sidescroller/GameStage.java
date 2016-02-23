@@ -3,8 +3,7 @@ package com.bau5.cs328.sidescroller;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -34,15 +33,15 @@ public class GameStage extends Stage {
 
     private TouchType touchType = TouchType.None;
 
-    private Vector3 touchPoint;
-    private Rectangle screenRight;
-    private Rectangle screenLeft;
-
     private final float step = 1 / 300f;
     private float accumulator = 0f;
 
     private OrthographicCamera camera;
     private Box2DDebugRenderer renderer;
+
+    private static boolean win = false;
+
+    public static TextureAtlas atlas = new TextureAtlas("textures/Textures.pack");
 
     public GameStage(Main main) {
         super(new ScalingViewport(Scaling.stretch, Vals.screenWidth(), Vals.screenHeight(),
@@ -50,7 +49,7 @@ public class GameStage extends Stage {
         this.main = main;
         setupWorld();
         setupDebugRenderer();
-        setupControlAreas();
+        Gdx.input.setInputProcessor(this);
     }
 
     @Override
@@ -94,7 +93,9 @@ public class GameStage extends Stage {
     private void updateBody(Body body) {
         if (BodyHelper.bodyLeftBounds(body) || BodyHelper.bodyShouldBeDestroyed(body)) {
             if (body.getUserData() instanceof RunnerUserData) {
+                runner.setInvincibilityTimer(0);
                 onRunnerHit();
+                runner.onHit(body);
             }
             world.destroyBody(body);
         }
@@ -126,37 +127,17 @@ public class GameStage extends Stage {
         camera.update();
     }
 
-    private void setupControlAreas() {
-        touchPoint = new Vector3();
-        screenRight = new Rectangle(getCamera().viewportWidth / 2, 0, getCamera().viewportWidth / 2, getCamera().viewportHeight);
-        screenLeft = new Rectangle(0, 0,  getCamera().viewportWidth / 2, getCamera().viewportHeight);
-        Gdx.input.setInputProcessor(this);
-    }
-
     public static Runner getRunner() {
         return runner;
     }
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        getCamera().unproject(touchPoint.set(screenX, screenY, 0));
-        if (screenRight.contains(touchPoint.x, touchPoint.y)) {
-            runner.jump();
-            touchType = TouchType.Jump;
-        } else if (!runner.isDodging() && screenLeft.contains(touchPoint.x, touchPoint.y)) {
-            runner.dodge();
-            touchType = TouchType.Dodge;
-        }
-
         return super.touchDown(screenX, screenY, pointer, button);
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (runner.isDodging()) {
-            runner.stopDodge();
-        }
-        touchType = TouchType.None;
         return super.touchUp(screenX, screenY, pointer, button);
     }
 
@@ -199,6 +180,20 @@ public class GameStage extends Stage {
                     Vals.screenWidth() / 2 - 80, (int)(Vals.screenHeight() * 0.75));
             this.getBatch().end();
         }
+        if (win) {
+            this.getBatch().begin();
+            StageWithButtons.font().draw(this.getBatch(), new StringBuilder("  You win!").subSequence(0, 10),
+                    Vals.screenWidth() / 2 - 80, (int)(Vals.screenHeight() * 0.75));
+            this.getBatch().end();
+        }
+    }
+
+    public static boolean hasWon() {
+        return win;
+    }
+
+    public void onExitContact() {
+        win = true;
     }
 }
 

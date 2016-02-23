@@ -11,7 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent
 import com.badlogic.gdx.scenes.scene2d.{Actor, Stage}
 import com.badlogic.gdx.utils.viewport.StretchViewport
-import com.bau5.cs328.sidescroller.{Main, Vals}
+import com.bau5.cs328.sidescroller.Main
+import com.bau5.cs328.sidescroller.utils.Vals
 
 /**
   * Created by Rick on 2/22/2016.
@@ -41,7 +42,7 @@ object StageWithButtons {
     temp
   }
 
-  def createStageWithButtons(func: (Skin) => Seq[ButtonWithListener]): Stage = {
+  def createStage(): Stage = {
     val temp = new Stage(
       new StretchViewport(
         Vals.screenWidth,
@@ -49,15 +50,18 @@ object StageWithButtons {
         new OrthographicCamera(Vals.screenWidth, Vals.screenHeight)
       )
     )
+    Gdx.input.setInputProcessor(temp)
+    temp
+  }
+
+  def addButtons(stage: Stage)(func: (Skin) => Seq[ButtonWithListener]): Unit = {
     val table = new Table
     table.setFillParent(true)
-    temp.addActor(table)
+    stage.addActor(table)
     func(buttonSkin).foreach { e =>
       table.add(e)
       table.row()
     }
-    Gdx.input.setInputProcessor(temp)
-    temp
   }
 }
 

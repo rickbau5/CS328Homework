@@ -1,8 +1,7 @@
 package com.bau5.cs328.sidescroller.actors
 
 import com.badlogic.gdx.math.Vector2
-import com.bau5.cs328.sidescroller.Vals
-import com.bau5.cs328.sidescroller.utils.PowerUpType
+import com.bau5.cs328.sidescroller.utils.{Vals, PowerUpType}
 
 /**
   * Created by Rick on 2/20/16.
@@ -33,7 +32,7 @@ case class RunnerUserData(w: Float, h: Float) extends UserData(w, h) {
 }
 case class PowerUpUserData(w: Float, h: Float, typ: PowerUpType) extends UserData(w, h) with Destroyable
 case class DangerousUserData(w: Float, h: Float) extends UserData(w, h)
-
+case class ExitUserData() extends UserData(1, 1)
 trait Destroyable {
   private var shouldBeDestroyed = false
   def shouldDestroy(): Boolean = shouldBeDestroyed

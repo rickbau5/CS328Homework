@@ -33,6 +33,8 @@ public class ContactHandler implements ContactListener {
             }
         } else if (runner.isJumping() && contactType instanceof RunnerStaticContact) {
             runner.landed();
+        } else if (contactType instanceof ExitContact) {
+            stage.onExitContact();
         }
     }
 
@@ -46,7 +48,6 @@ public class ContactHandler implements ContactListener {
         if (contactType instanceof RunnerStaticContact && !runner.hit()) {
             Vector2 norm = oldManifold.getLocalNormal();
             if (norm.equals(new Vector2(1.0f, -0.0f)) && runner.isJumping()) {
-                System.out.println("Hit? " + norm);
                 contact.setEnabled(false);
                 if (runner.onHit(contactType.other())) {
                     stage.onRunnerHit();
