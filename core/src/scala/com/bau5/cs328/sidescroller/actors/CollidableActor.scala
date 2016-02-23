@@ -42,13 +42,12 @@ class TexturedCollidable[D <: UserData](body: Body, texturePath: String, w: Floa
     if (scaleX > 1 || scaleY > 1) {
       val xOff = if (scaleX > 1) transform(w / scaleX) else 0
       var yOff = 0
-      -->(d => if (d.isInstanceOf[PowerUpUserData]) yOff = transform(0.5f).toInt)
+      --> (d => if (d.isInstanceOf[PowerUpUserData]) yOff = transform(0.5f).toInt)
       batch.draw(textureRegion, screenRectangle.x - xOff, screenRectangle.y - yOff, 0, 0, screenRectangle.width, screenRectangle.height, scaleX, scaleY, 0)
     } else {
       batch.draw(textureRegion, screenRectangle.x, screenRectangle.y, screenRectangle.width, screenRectangle.height)
     }
   }
-
 }
 
 class DangerousCollidable(body: Body, texturePath: String, w: Float, h: Float, xs: Float = 1, ys: Float = 1) extends TexturedCollidable(body, texturePath, w, h, xs, ys, Option(new DangerousUserData(w, h))) {

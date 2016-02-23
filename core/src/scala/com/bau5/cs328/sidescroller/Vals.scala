@@ -13,8 +13,8 @@ object Vals {
 
   val debugWidth = 20
   val debugHeight = 13
-  val debug = true
-  val freeze = true
+  val debug = false
+  val freeze = false
 
   val gravity = new Vector2(0, -10f)
 

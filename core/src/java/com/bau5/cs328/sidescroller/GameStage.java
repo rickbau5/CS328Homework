@@ -16,11 +16,9 @@ import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.bau5.cs328.sidescroller.actors.*;
 import com.bau5.cs328.sidescroller.actors.environment.Background;
 import com.bau5.cs328.sidescroller.actors.environment.Grass;
-import com.bau5.cs328.sidescroller.screens.ButtonListener;
 import com.bau5.cs328.sidescroller.screens.ButtonWithListener;
 import com.bau5.cs328.sidescroller.screens.StageWithButtons;
 import com.bau5.cs328.sidescroller.utils.*;
-import scala.Function0;
 
 
 /**
@@ -70,6 +68,12 @@ public class GameStage extends Stage {
             if (!actor.isVisible() && actor instanceof GameActor && BodyHelper.bodyOnScreen(((GameActor)actor).body())) {
                 actor.setVisible(true);
                 runner.toFront();
+            } else if (actor instanceof StarActor) {
+                if (actor.isVisible() && !runner.invincible()) {
+                    actor.setVisible(false);
+                } else if (!actor.isVisible() && runner.invincible()) {
+                    actor.setVisible(true);
+                }
             }
         }
 
@@ -90,7 +94,7 @@ public class GameStage extends Stage {
     private void updateBody(Body body) {
         if (BodyHelper.bodyLeftBounds(body) || BodyHelper.bodyShouldBeDestroyed(body)) {
             if (body.getUserData() instanceof RunnerUserData) {
-                System.out.println("runner leaving screen.");
+                onRunnerHit();
             }
             world.destroyBody(body);
         }
@@ -109,6 +113,7 @@ public class GameStage extends Stage {
         addActor(new Background());
         addActor(new Grass(true));
         addActor(runner);
+        addActor(new StarActor());
         world.setContactListener(new ContactHandler(runner, this));
 
         Mapper.loadActors(world, this);
